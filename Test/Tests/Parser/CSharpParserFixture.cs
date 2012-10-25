@@ -67,6 +67,45 @@ namespace Vici.Core.Test
             public int this[int i] { get { return i * 2; } }
             public int this[int x, int y] { get { return x + y; } }
 
+            /// <summary>
+            /// Test method #1 for generics
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            public string Get<T>(int x)
+            {
+                return typeof(T)+":"+x.ToString();
+            }
+
+            /// <summary>
+            /// Test method #2 for generics
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            public string Get<T>(string x)
+            {
+                return typeof(T)+":"+x;
+            }
+
+            /// <summary>
+            /// Test Method #3 for generics
+            /// </summary>
+            /// <typeparam name="T1"></typeparam>
+            /// <typeparam name="T2"></typeparam>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            public string Get<T1, T2>(int x)
+            {
+                return typeof(T1) + "," + typeof(T2) + ":"+x;
+            }
+
+            public static string StaticGet<T1,T2>(int x)
+            {
+                return "Static:"+typeof(T1) + "," + typeof(T2) + ":" + x;
+            }
+
         }
 
         [TestInitialize]
@@ -869,6 +908,24 @@ f(max(2,1));
             _parser.Evaluate(script, context);
 
             Assert.AreEqual("22", output);
+        }
+
+
+        /// <summary>
+        /// Some tests for the generic implementation
+        /// </summary>
+        [TestMethod()]
+        public void Generics()
+        {
+            // Verify that correct generic methods are selected based upon type
+            Assert.AreEqual("System.Int32:50", _parser.Evaluate<string>("Data.Get<int>(50)"));
+            Assert.AreEqual("System.Int32:fred", _parser.Evaluate<string>("Data.Get<int>(\"fred\")"));
+
+            // Verify that multiple generic parameters are handled correctly
+            Assert.AreEqual("System.Int32,System.String:1234",_parser.Evaluate<string>("Data.Get<int,string>(1234)"));
+
+            // Verify that statics  work...
+            Assert.AreEqual("Static:System.Int32,System.String:1234", _parser.Evaluate<string>("DataClass.StaticGet<int,string>(1234)"));
         }
 
     }

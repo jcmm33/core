@@ -73,6 +73,8 @@ namespace Vici.Core.Parser
             AddTokenMatcher(new CharMatcher(';'), TokenType.StatementSeparator);
             AddTokenMatcher(new CharMatcher('{'), TokenType.OpenBrace);
             AddTokenMatcher(new CharMatcher('}'), TokenType.CloseBrace);
+
+            AddTokenMatcher(new GenericVariableMatcher(), TokenType.Term, CSharpEvaluator.GenericVarName);
         }
     }
 }

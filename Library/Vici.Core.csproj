@@ -78,6 +78,7 @@
     <Compile Include="Notifier\Notification.cs" />
     <Compile Include="Notifier\Notifier.cs" />
     <Compile Include="Parser\ExpressionParser\Expression\FunctionValueExpression.cs" />
+    <Compile Include="Parser\ExpressionParser\Expression\GenericVariableExpression.cs" />
     <Compile Include="Parser\ExpressionParser\Expression\Logic\FunctionDefinitionExpression.cs" />
     <Compile Include="Parser\ExpressionParser\Expression\Logic\IfExpression.cs" />
     <Compile Include="Parser\ExpressionParser\Expression\Logic\InExpression.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Parser\ExpressionParser\Expression\ReturnExpression.cs" />
     <Compile Include="Parser\ExpressionParser\Expression\ReturnValueExpression.cs" />
     <Compile Include="Parser\ExpressionParser\Expression\SequenceExpression.cs" />
+    <Compile Include="Parser\Parsers\CSharp\Tokenizer\Tokens\GenericVariableMatcher.cs" />
     <Compile Include="Parser\TemplateParser\Nodes\ExpressionTemplateNode.cs" />
     <Compile Include="Parser\TemplateParser\Nodes\ForEachTemplateNode.cs" />
     <Compile Include="Reflection\LazyBinder.cs" />

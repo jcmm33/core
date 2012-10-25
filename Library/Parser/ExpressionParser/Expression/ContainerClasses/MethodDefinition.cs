@@ -33,9 +33,22 @@ namespace Vici.Core.Parser
     {
         protected readonly Type _type;
         protected readonly string _methodName;
-        protected readonly MethodInfo _methodInfo;
+
+        /// <summary>
+        /// THe array of suitable methods
+        /// </summary>
+        protected readonly MethodInfo[] _methodInfo;
 
         protected MethodDefinition(MethodInfo methodInfo)
+        {
+            _methodInfo = new MethodInfo[1] { methodInfo };
+        }
+
+        /// <summary>
+        /// Create an instance with an array of suitable methods.
+        /// </summary>
+        /// <param name="methodInfo">The array of methods</param>
+        protected MethodDefinition(MethodInfo[] methodInfo)
         {
             _methodInfo = methodInfo;
         }
@@ -58,8 +71,18 @@ namespace Vici.Core.Parser
 
         public MethodInfo GetMethodInfo(Type[] parameterTypes)
         {
+            // If method information was provided then we use them
             if (_methodInfo != null)
-                return _methodInfo;
+            {
+                // only a single method, lets run with that one
+                if (_methodInfo.Length == 1)
+                {
+                    return _methodInfo[0];
+                }
+
+                // more than one method, now need to select the best...
+                return LazyBinder.SelectBestMethod(_methodInfo, parameterTypes);
+            }
 
             Type t = _type;
 

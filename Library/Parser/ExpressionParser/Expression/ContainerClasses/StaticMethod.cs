@@ -35,6 +35,15 @@ namespace Vici.Core.Parser
         {
         }
 
+        /// <summary>
+        /// Create an instance with an array of matching methods.
+        /// </summary>
+        /// <param name="methodInfo">The array of methods</param>
+        public StaticMethod(MethodInfo[] methodInfo)
+            : base(methodInfo)
+        {
+        }
+
         public StaticMethod(Type type, string methodName) : base(type, methodName)
         {
         }

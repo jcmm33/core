@@ -35,10 +35,24 @@ namespace Vici.Core.Parser
         private readonly Expression _target;
         private readonly string _member;
 
-        public FieldExpression(TokenPosition position, Expression target, string member) : base(position)
+        /// <summary>
+        /// An array of generic Types
+        /// </summary>
+        private readonly Type[] _genericTypes;
+
+        /// <summary>
+        /// Create a field expression.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="target"></param>
+        /// <param name="member"></param>
+        /// <param name="generics">An optional collection of genericTypes</param>
+        public FieldExpression(TokenPosition position, Expression target, string member, Type[] genericTypes = null)
+            : base(position)
         {
             _target = target;
             _member = member;
+            _genericTypes = genericTypes;
         }
 
         public override ValueExpression Evaluate(IParserContext context)
@@ -75,7 +89,8 @@ namespace Vici.Core.Parser
                     return new ValueExpression(TokenPosition, value,type);
             }
 
-		    MemberInfo[] members = FindMemberInHierarchy(targetType, _member);// targetType.GetMember(_member);
+            // Resolve the matching members 
+            MemberInfo[] members = FindMemberInHierarchy(targetType, _member, _genericTypes);// targetType.GetMember(_member);
 
     		if (members.Length == 0)
     		{
@@ -89,13 +104,17 @@ namespace Vici.Core.Parser
     			throw new UnknownPropertyException("Unknown property " + _member + " for object " + _target + " (type " + targetType.Name + ")", this);
     		}
 
-    		if (members.Length >= 1 && members[0] is MethodInfo)
-    		{
-    			if (targetObject == null)
-                    return Exp.Value(TokenPosition, new StaticMethod(targetType, _member));
-    			else
-                    return Exp.Value(TokenPosition, new InstanceMethod(targetType, _member, targetObject));
-    		}
+
+            // Use the existing reflected members which have already had the generic(s) if any applied
+            if (members.Length >= 1 && members[0] is MethodInfo)
+            {
+                MethodInfo[] methodInfo = members.ConvertAll<MemberInfo, MethodInfo>((p) => p as MethodInfo);
+
+                if (targetObject == null)
+                    return Exp.Value(TokenPosition, new StaticMethod(methodInfo));
+                else
+                    return Exp.Value(TokenPosition, new InstanceMethod(methodInfo, targetObject));
+            }
 
     		MemberInfo member = members[0];
 
@@ -140,6 +159,36 @@ namespace Vici.Core.Parser
                 t = t.Inspector().BaseType;
             }
 
+            return new MemberInfo[0];
+        }
+
+        /// <summary>
+        /// Find matching members for a type, matching on a name and specified generic types.
+        /// </summary>
+        /// <param name="type">The type to search</param>
+        /// <param name="name">The name of the member</param>
+        /// <param name="genericNames">An array of types</param>
+        /// <returns>An array of matching <see cref="MemberInfo"/> instances.</returns>
+        private static MemberInfo[] FindMemberInHierarchy(Type type, string name, Type[] genericNames)
+        {
+            // if we don't have any generics specified, then use the default model
+            if (genericNames == null || genericNames.Length == 0)
+            {
+                return FindMemberInHierarchy(type, name);
+
+            }
+
+            Type t = type;
+
+            MemberInfo[] members = t.Inspector().GetMember(name, genericNames);
+
+            // if we have members return it
+            if (members.Length > 0)
+            {
+                return members;
+            }
+
+            // return empty array
             return new MemberInfo[0];
         }
 

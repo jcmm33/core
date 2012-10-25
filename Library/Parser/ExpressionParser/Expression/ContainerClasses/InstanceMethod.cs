@@ -38,6 +38,18 @@ namespace Vici.Core.Parser
             _object = @object;
         }
 
+        /// <summary>
+        /// Create an instance with an array of possible methods.
+        /// </summary>
+        /// <param name="methodInfo">An array of methods</param>
+        /// <param name="object">The instance object</param>
+        public InstanceMethod(MethodInfo[] methodInfo, object @object)
+            : base(methodInfo)
+        {
+            _object = @object;
+        }
+
+  
         public InstanceMethod(Type type, string methodName, object @object) : base(type, methodName)
         {
             _object = @object;

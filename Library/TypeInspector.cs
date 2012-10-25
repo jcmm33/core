@@ -162,6 +162,31 @@ namespace Vici.Core
 #endif
         }
 
+        /// <summary>
+        /// Get a member matching with the specified property name and generic types.
+        /// </summary>
+        /// <param name="propertyName">The property name</param>
+        /// <param name="genericTypes">The generic types</param>
+        /// <returns>An array of matching <see cref="MemberInfo"/> instances.</returns>
+        public MemberInfo[] GetMember(string propertyName, Type[] genericTypes)
+        {
+            MethodInfo[] methods;
+#if NETFX_CORE
+            IEnumerable<MethodInfo> methods = WalkAndFindMultiple(t => t.GetTypeInfo().DeclaredMembers.Where(m => m.Name == propertyName && m.IsGenericMethod && p.GetGenericArguments().Count() == genericTypes.Length));
+#else
+            methods = _t.GetMethods().Where(p => p.IsGenericMethod == true && p.GetGenericArguments().Count() == genericTypes.Length && p.Name == propertyName).ToArray();
+#endif
+            // now then, we need to make generic methods for each matching member
+            List<MemberInfo> members = new List<MemberInfo>();
+
+            foreach (MethodInfo method in methods)
+            {
+                members.Add(method.MakeGenericMethod(genericTypes));
+            }
+
+            return members.ToArray();
+        }
+
         public PropertyInfo GetIndexer(Type[] types)
         {
 #if NETFX_CORE

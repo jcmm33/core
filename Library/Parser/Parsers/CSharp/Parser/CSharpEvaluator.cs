@@ -190,6 +190,19 @@ namespace Vici.Core.Parser
             return new VariableExpression(position, token);
         }
 
+        /// <summary>
+        /// Create a <see cref="GenericVariableExpression"/> instance.
+        /// </summary>
+        /// <param name="token">The token</param>
+        /// <param name="position">The tokens position</param>
+        /// <param name="terms">A</param>
+        /// <returns>A <see cref="GenericVariableExpression"/></returns>
+        public static Expression GenericVarName(string token, TokenPosition position, Expression[] terms)
+        {
+            return new GenericVariableExpression(position, token);
+        }
+
+
         public static Expression Function(string token, TokenPosition position, Expression[] terms)
         {
             Expression[] parameters = new Expression[terms.Length - 1];
@@ -322,12 +335,23 @@ namespace Vici.Core.Parser
 
         public static Expression DotOperator(string token, TokenPosition position, Expression[] terms)
         {
-            VariableExpression varExpression = terms[1] as VariableExpression;
+            // now the thing to remember here is that expression isn't always a straight forward field, but instead
+            // it can be a generic representation...
+            if ((terms[1] as GenericVariableExpression) != null)
+            {
+                GenericVariableExpression genExpression = terms[1] as GenericVariableExpression;
 
-            if (varExpression == null)
-                throw new UnknownPropertyException("Unkown member " + terms[1], terms[1]);
+                return new FieldExpression(position, terms[0], genExpression.VarName, genExpression.Generics);
+            }
+            else
+            {
+                VariableExpression varExpression = terms[1] as VariableExpression;
 
-            return new FieldExpression(position, terms[0], varExpression.VarName);
+                if (varExpression == null)
+                    throw new UnknownPropertyException("Unkown member " + terms[1], terms[1]);
+
+                return new FieldExpression(position, terms[0], varExpression.VarName);
+            }
         }
 
         public static Expression Constructor(string token, TokenPosition position, Expression[] terms)
