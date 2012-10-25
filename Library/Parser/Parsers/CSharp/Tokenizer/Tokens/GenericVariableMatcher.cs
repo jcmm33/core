@@ -26,7 +26,7 @@ namespace Vici.Core.Parser
         /// <summary>
         /// The characters considered valie for a generic placeholder (and separator)
         /// </summary>
-        private const string VALID_GENERICCHARS = "abcdefghijkklmnopqrstuvwxyzABCDEFGHIJKKLMNOPQRSTUVWXYZ_@$0123456789,";
+        private const string VALID_GENERICCHARS = "abcdefghijkklmnopqrstuvwxyzABCDEFGHIJKKLMNOPQRSTUVWXYZ_@$0123456789,?";
 
         /// <summary>
         /// Have we seen a starting character ?

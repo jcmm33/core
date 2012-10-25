@@ -926,6 +926,9 @@ f(max(2,1));
 
             // Verify that statics  work...
             Assert.AreEqual("Static:System.Int32,System.String:1234", _parser.Evaluate<string>("DataClass.StaticGet<int,string>(1234)"));
+
+            // Verify that nullables work
+            Assert.AreEqual("System.Nullable`1[System.Int32],System.String:50", _parser.Evaluate<string>("Data.Get<int?,string>(50)"));
         }
 
     }
