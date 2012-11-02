@@ -45,6 +45,11 @@ namespace Vici.Core.Parser
         private AssignmentPermissions _assignmentPermissions = AssignmentPermissions.None;
         private StringComparison _stringComparison = StringComparison.Ordinal;
         private IFormatProvider _formatProvider = NumberFormatInfo.InvariantInfo;
+
+        /// <summary>
+        /// The optional custom resolver for when variables can be resolved from the contexts
+        /// </summary>
+        private Func<string,Tuple<object,Type>> _customResolver;
         
         public ParserContext(ParserContextBehavior behavior)
         {
@@ -160,6 +165,21 @@ namespace Vici.Core.Parser
             set { _stringComparison = value; }
         }
 
+        /// <summary>
+        /// Get or set a custom resolver.
+        /// </summary>
+        public Func<string, Tuple<object, Type>> CustomResolver
+        {
+            get
+            {
+                return _customResolver;
+            }
+            set
+            {
+                _customResolver = value;
+            }
+        }
+
 //        public bool EmptyCollectionIsFalse
 //        {
 //            get { return _emptyCollectionIsFalse; }
@@ -264,8 +284,24 @@ namespace Vici.Core.Parser
             }
             else
             {
+                // if doesn't have parent context, or parent context can't help...
                 if (_parentContext == null || !_parentContext.Get(varName, out value, out type))
                 {
+                    // if we have a custom resolver...
+                    if (CustomResolver != null)
+                    {
+                        Tuple<object,Type> result = CustomResolver(varName);
+
+                        // if we got a result back...
+                        if (result != null)
+                        {
+                            value = result.Value1;
+                            type = result.Value2;
+
+                            return true;
+                        }
+                    }
+
                     value = null;
                     type = typeof(object);
 

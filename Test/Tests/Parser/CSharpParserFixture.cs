@@ -931,5 +931,65 @@ f(max(2,1));
             Assert.AreEqual("System.Nullable`1[System.Int32],System.String:50", _parser.Evaluate<string>("Data.Get<int?,string>(50)"));
         }
 
+        /// <summary>
+        /// Verify custom resolver is invoked and returns value which is used.
+        /// </summary>
+        [TestMethod()]
+        public void CustomResolverWhenExists()
+        {
+            // verify that when we have a custom resolver it is called AND
+            // the value returned is used in the calculations
+
+            CSharpContext context = new CSharpContext();
+
+            int testReturnVar = 12345;
+            Boolean called = false;
+
+            context.CustomResolver = (name) =>
+            {
+                called = true; return name == "existVar" ?
+         new Tuple<object, Type>(testReturnVar, typeof(int)) : null;
+            };
+
+            int actual = _parser.Evaluate<int>("existVar;", context);
+
+            Assert.IsTrue(called);
+            Assert.AreEqual(testReturnVar, actual);
+        }
+
+        /// <summary>
+        /// Verify that when a custom resolver is specified but it doesn't resolve then we get
+        /// the expected exception for the expression parsing.
+        /// </summary>
+        [TestMethod()]
+        public void CustomResolverWhenDoesntExist()
+        {
+            CSharpContext context = new CSharpContext();
+
+            int testReturnVar = 12345;
+            Boolean called = false;
+            Boolean exceptionRaised = true;
+
+            context.CustomResolver = (name) =>
+            {
+                called = true; return name == "existVar" ?
+         new Tuple<object, Type>(testReturnVar, typeof(int)) : null;
+            };
+
+            // Note that we don't use the ExpectedException Attribute - we 
+            // want to know that the custom resolver was called.
+            try
+            {
+                int actual = _parser.Evaluate<int>("notExistVar;", context);
+            }
+            catch (System.NullReferenceException nullException)
+            {
+                exceptionRaised = true;
+            }
+
+            Assert.IsTrue(called);
+            Assert.IsTrue(exceptionRaised);
+        }
+
     }
 }
